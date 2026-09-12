@@ -1,7 +1,41 @@
-// High quality image mapper for destination and landmark photos
-function getLandmarkImage(destination, placeName) {
-  const query = encodeURIComponent(`${placeName || destination}`.replace(/[^a-zA-Z0-9\s]/g, '').trim());
-  return `https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&auto=format&fit=crop&q=80`;
+// Dynamic image provider based on destination topic & landmark query
+const landmarkImageMap = {
+  marina: [
+    'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?w=600&auto=format&fit=crop&q=80', // Marina beach promenade
+    'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600&auto=format&fit=crop&q=80', // Temple architecture
+    'https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=600&auto=format&fit=crop&q=80', // Fort & Heritage
+    'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=600&auto=format&fit=crop&q=80', // Sunset shore
+    'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&auto=format&fit=crop&q=80'  // Lighthouse view
+  ],
+  goa: [
+    'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=600&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=600&auto=format&fit=crop&q=80'
+  ],
+  paris: [
+    'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=600&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1499856871958-5b9627545d1a?w=600&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1509299349698-dd22323b5963?w=600&auto=format&fit=crop&q=80'
+  ],
+  default: [
+    'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=600&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=600&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1476514525535-ce74f45814d9?w=600&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1503220317375-aaad61436b1b?w=600&auto=format&fit=crop&q=80'
+  ]
+};
+
+function getLandmarkImage(destination, placeName, index = 0) {
+  const destClean = (destination || '').toLowerCase();
+  let list = landmarkImageMap.default;
+  if (destClean.includes('marina') || destClean.includes('chennai')) {
+    list = landmarkImageMap.marina;
+  } else if (destClean.includes('goa')) {
+    list = landmarkImageMap.goa;
+  } else if (destClean.includes('paris')) {
+    list = landmarkImageMap.paris;
+  }
+  return list[index % list.length];
 }
 
 function getGoogleMapsUrl(placeName, destination) {
@@ -103,21 +137,21 @@ function generateSmartItinerary(destination, budget, duration, preferences) {
         activity: mItem.desc,
         placeName: mItem.name,
         mapsUrl: getGoogleMapsUrl(mItem.place, destClean),
-        image: getLandmarkImage(destClean, mItem.name),
+        image: getLandmarkImage(destClean, mItem.name, i * 3 - 2),
         cost: mCost
       },
       afternoon: {
         activity: aItem.desc,
         placeName: aItem.name,
         mapsUrl: getGoogleMapsUrl(aItem.place, destClean),
-        image: getLandmarkImage(destClean, aItem.name),
+        image: getLandmarkImage(destClean, aItem.name, i * 3 - 1),
         cost: aCost
       },
       evening: {
         activity: eItem.desc,
         placeName: eItem.name,
         mapsUrl: getGoogleMapsUrl(eItem.place, destClean),
-        image: getLandmarkImage(destClean, eItem.name),
+        image: getLandmarkImage(destClean, eItem.name, i * 3),
         cost: eCost
       }
     });

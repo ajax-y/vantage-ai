@@ -85,19 +85,11 @@ export default function App() {
     <div className="app-container">
       {/* Premium Navbar */}
       <header className="navbar">
-        <div className="nav-brand" style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }} onClick={() => setTab('home')}>
-          <svg width="36" height="36" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ marginRight: '10px' }}>
-            <circle cx="50" cy="50" r="45" stroke="url(#logo-grad)" strokeWidth="6" fill="rgba(99, 102, 241, 0.05)" />
-            <path d="M50 15L62 45L92 50L62 55L50 85L38 55L8 50L38 45Z" fill="url(#logo-grad)" />
-            <circle cx="50" cy="50" r="10" fill="#ffffff" />
-            <defs>
-              <linearGradient id="logo-grad" x1="0" y1="0" x2="100" y2="100">
-                <stop offset="0%" stopColor="#6366f1" />
-                <stop offset="100%" stopColor="#f59e0b" />
-              </linearGradient>
-            </defs>
-          </svg>
-          <span>Vantage AI</span>
+        <div className="nav-brand" style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.6rem' }} onClick={() => setTab('home')}>
+          <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'linear-gradient(135deg, #6366f1 0%, #38bdf8 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ffffff', fontWeight: '800', fontSize: '0.85rem', letterSpacing: '-0.05em' }}>
+            V
+          </div>
+          <span style={{ fontFamily: 'var(--font-display)', fontWeight: '700', fontSize: '1.15rem', color: '#ffffff', letterSpacing: '-0.03em' }}>Vantage</span>
         </div>
         <nav>
           <ul className="nav-links">
