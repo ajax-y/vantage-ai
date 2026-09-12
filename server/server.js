@@ -141,7 +141,7 @@ app.post('/api/generate-trip', async (req, res) => {
   }
 
   // Smart Engine fallback
-  const smartPlan = generateSmartItinerary(destination, budget, duration, preferences);
+  const smartPlan = await generateSmartItinerary(destination, budget, duration, preferences);
   res.json(smartPlan);
 });
 
