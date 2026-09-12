@@ -4,6 +4,7 @@ const dotenv = require('dotenv');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const db = require('./db');
 const { getMockWeather, getMockHotels, getMockRestaurants } = require('./mockData');
+const { generateSmartItinerary } = require('./smartItinerary');
 
 dotenv.config();
 
@@ -17,17 +18,16 @@ app.use(express.json());
 const geminiApiKey = process.env.GEMINI_API_KEY;
 let aiModel = null;
 if (geminiApiKey) {
-  const genAI = new GoogleGenerativeAI(geminiApiKey);
-  aiModel = genAI.getGenerativeModel({ model: 'gemini-pro' });
-  console.log('Gemini AI Model initialized successfully.');
+  try {
+    const genAI = new GoogleGenerativeAI(geminiApiKey);
+    // Use gemini-1.5-flash for speed and reliability
+    aiModel = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    console.log('Gemini AI Model initialized successfully.');
+  } catch (err) {
+    console.error('Error initializing Gemini model:', err.message);
+  }
 } else {
   console.log('No GEMINI_API_KEY found. Falling back to the robust local AI Simulation Engine.');
-}
-
-const { generateSmartItinerary } = require('./smartItinerary');
-
-function generateMockItinerary(destination, budget, duration, preferences) {
-  return generateSmartItinerary(destination, budget, duration, preferences);
 }
 
 // --- Endpoints ---
@@ -87,106 +87,207 @@ app.post('/api/generate-trip', async (req, res) => {
   if (aiModel) {
     try {
       const promptText = `
-        You are a premium travel planner. Generate a highly detailed, professional, and personalized travel itinerary in JSON format.
+        You are a world-class travel planner. Generate a highly authentic, hyper-realistic day-by-day itinerary in JSON format.
         Destination: ${destination}
         Total Budget: INR ${budget}
         Duration: ${duration} Days
-        User Preferences: ${preferences}
+        User Preferences: ${preferences || 'General exploration'}
 
-        Respond ONLY with a valid JSON object matching this schema (do not wrap in markdown tags or backticks, all currency values must be in INR):
+        Rules:
+        - All currency numbers must be in INR (₹) and strictly realistic to the destination and total budget.
+        - Mention REAL local landmarks, authentic food spots, and neighborhoods for ${destination}.
+        - Respond ONLY with valid raw JSON (no markdown formatting, no backticks).
+
+        Schema:
         {
           "destination": "${destination}",
           "budget": "₹${budget}",
           "duration": ${duration},
-          "preferences": "${preferences}",
-          "summary": "Detailed overall summary...",
+          "preferences": "${preferences || 'General exploration'}",
+          "summary": "Detailed, engaging overall trip summary...",
           "itinerary": [
             {
               "day": 1,
-              "title": "Day 1 theme...",
-              "morning": { "activity": "...", "cost": 0 },
-              "afternoon": { "activity": "...", "cost": 0 },
-              "evening": { "activity": "...", "cost": 0 }
+              "title": "Day title...",
+              "morning": { "activity": "Specific authentic morning activity...", "cost": 100 },
+              "afternoon": { "activity": "Specific authentic afternoon activity & lunch...", "cost": 200 },
+              "evening": { "activity": "Specific evening experience & dinner...", "cost": 150 }
             }
           ],
           "budgetBreakdown": {
-            "accommodation": 0,
-            "foodAndDrinks": 0,
-            "activities": 0,
-            "transport": 0,
-            "totalEstimate": 0
+            "accommodation": 1200,
+            "foodAndDrinks": 800,
+            "activities": 300,
+            "transport": 200,
+            "totalEstimate": 2500
           },
-          "packingTips": ["tip 1", "tip 2"]
+          "packingTips": ["Realistic tip 1", "Realistic tip 2", "Realistic tip 3"]
         }
       `;
 
       const result = await aiModel.generateContent(promptText);
       const text = result.response.text();
-      const cleanJson = text.replace(/```json/g, '').replace(/```/g, '').trim();
+      const cleanJson = text.replace(/```json/gi, '').replace(/```/g, '').trim();
       const plan = JSON.parse(cleanJson);
       return res.json(plan);
     } catch (err) {
-      console.error('Gemini error, using fallback:', err);
-      // Fallback
+      console.error('Gemini AI generation error, utilizing smart engine fallback:', err.message);
     }
   }
 
-  // Fallback engine
-  const mockPlan = generateMockItinerary(destination, budget, duration, preferences);
-  res.json(mockPlan);
+  // Smart Engine fallback
+  const smartPlan = generateSmartItinerary(destination, budget, duration, preferences);
+  res.json(smartPlan);
 });
 
+// AI Chat Endpoint
 app.post('/api/chat', async (req, res) => {
   const { message, history, context } = req.body;
   
   if (aiModel) {
     try {
       const chatPrompt = `
-        You are Vantage AI, a travel planning assistant. The user is planning a trip to ${context.destination} (Budget: ${context.budget} INR).
-        Current planned itinerary: ${JSON.stringify(context.itinerary)}
+        You are Vantage AI, an expert travel concierge. The user is planning a trip to ${context?.destination || 'their destination'} (Budget: ${context?.budget || 'budget'} INR).
+        Planned Itinerary Context: ${JSON.stringify(context?.itinerary || [])}
         
-        User's question/request: ${message}
+        User Query: ${message}
         
-        Provide a helpful, polite, and detailed travel advisory response. Keep currency references in INR (₹).
+        Provide an insightful, polite, and practical travel advisory response. Keep currency in INR (₹).
       `;
       const result = await aiModel.generateContent(chatPrompt);
       return res.json({ reply: result.response.text() });
     } catch (err) {
-      console.error('Gemini chat error:', err);
+      console.error('Gemini chat error:', err.message);
     }
   }
 
-  // Fallback interactive chat
+  // Smart Fallback interactive chat
   const lowercase = message.toLowerCase();
-  let reply = `That sounds interesting! For your trip to ${context.destination}, adjusting that schedule is completely possible. Let me know if you would like me to swap out any activities!`;
+  let reply = `For your trip to ${context?.destination || 'this destination'}, adjusting the itinerary to suit your preferences is easy! Tell me which days or activities you'd like to customize.`;
   
   if (lowercase.includes('hotel') || lowercase.includes('stay')) {
-    reply = `Regarding accommodation in ${context.destination}, within your budget of ${context.budget}, I recommend looking at options nearby the subway or tourist centers to minimize transport cost. Would you like me to fetch local hotel rates?`;
+    reply = `For accommodation in ${context?.destination || 'your trip'}, staying near central transport hubs or local lodges is ideal for your budget. Check out our Stays tab to view live booking links!`;
   } else if (lowercase.includes('restaurant') || lowercase.includes('food') || lowercase.includes('eat')) {
-    reply = `Local cuisine is one of the best parts of visiting ${context.destination}! I recommend checking our Restaurants tab for authentic, top-rated local dining spots suited for your budget of ${context.budget}.`;
+    reply = `Local food is an amazing highlight of visiting ${context?.destination || 'this place'}! Browse our Dining tab for authentic restaurants with direct directions and reservation options.`;
   } else if (lowercase.includes('weather') || lowercase.includes('rain') || lowercase.includes('temp')) {
-    reply = `Checking weather forecasts is a smart move. Check out the Weather tab above to see real-time forecasts and pack accordingly!`;
-  } else if (lowercase.includes('free') || lowercase.includes('cheap')) {
-    reply = `To save money within your budget of ${context.budget}, you can visit local parks, walk around historic neighborhoods, and take advantage of free museum days.`;
+    reply = `Make sure to check the Weather tab above for 7-day temperature and condition forecasts before packing!`;
   }
 
   res.json({ reply });
 });
 
-// External/Simulated APIs
-app.get('/api/weather', (req, res) => {
-  const { destination } = req.query;
-  res.json(getMockWeather(destination));
-});
-
-app.get('/api/hotels', (req, res) => {
+// Stays & Accommodations with Booking URLs
+app.get('/api/hotels', async (req, res) => {
   const { destination, budget } = req.query;
+
+  if (aiModel) {
+    try {
+      const promptText = `
+        List 4 REAL, highly-rated hotels or budget stays in ${destination || 'Goa'} suitable for a daily stay budget of INR ${budget || 5000}.
+        Respond ONLY with a valid JSON array of objects (no markdown, no backticks).
+
+        Schema:
+        [
+          {
+            "id": "h1",
+            "name": "Exact Real Hotel Name",
+            "rating": 4.5,
+            "price": "Budget / Moderate / Luxury",
+            "pricePerNight": 1500,
+            "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=500",
+            "description": "Brief description of location and highlights...",
+            "bookingUrl": "https://www.booking.com/searchresults.html?ss=${encodeURIComponent(destination || 'hotel')}"
+          }
+        ]
+      `;
+      const result = await aiModel.generateContent(promptText);
+      const text = result.response.text();
+      const cleanJson = text.replace(/```json/gi, '').replace(/```/g, '').trim();
+      const hotels = JSON.parse(cleanJson);
+      return res.json(hotels);
+    } catch (err) {
+      console.error('Gemini hotels error, using smart fallback:', err.message);
+    }
+  }
+
   res.json(getMockHotels(destination, budget));
 });
 
-app.get('/api/restaurants', (req, res) => {
+// Dining & Restaurants with Directions & Booking URLs
+app.get('/api/restaurants', async (req, res) => {
   const { destination } = req.query;
+
+  if (aiModel) {
+    try {
+      const promptText = `
+        List 4 REAL, famous restaurants or local dining spots in ${destination || 'Goa'}.
+        Respond ONLY with a valid JSON array of objects (no markdown, no backticks).
+
+        Schema:
+        [
+          {
+            "id": "r1",
+            "name": "Exact Real Restaurant Name",
+            "cuisine": "Cuisine type",
+            "rating": 4.7,
+            "price": "₹₹",
+            "description": "Must-try dish and atmosphere...",
+            "mapsUrl": "https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(destination + ' restaurants')}"
+          }
+        ]
+      `;
+      const result = await aiModel.generateContent(promptText);
+      const text = result.response.text();
+      const cleanJson = text.replace(/```json/gi, '').replace(/```/g, '').trim();
+      const restaurants = JSON.parse(cleanJson);
+      return res.json(restaurants);
+    } catch (err) {
+      console.error('Gemini restaurants error, using smart fallback:', err.message);
+    }
+  }
+
   res.json(getMockRestaurants(destination));
+});
+
+// Weather API
+app.get('/api/weather', async (req, res) => {
+  const { destination } = req.query;
+
+  if (aiModel) {
+    try {
+      const promptText = `
+        Provide accurate current weather and 7-day forecast for ${destination || 'Paris'}.
+        Respond ONLY with a valid JSON object (no markdown, no backticks).
+
+        Schema:
+        {
+          "destination": "${destination}",
+          "temp": 28,
+          "condition": "Sunny",
+          "humidity": 60,
+          "windSpeed": 12,
+          "forecast": [
+            { "day": "Mon", "temp": 28, "condition": "Sunny" },
+            { "day": "Tue", "temp": 29, "condition": "Clear" },
+            { "day": "Wed", "temp": 27, "condition": "Partly Cloudy" },
+            { "day": "Thu", "temp": 26, "condition": "Light Rain" },
+            { "day": "Fri", "temp": 28, "condition": "Sunny" },
+            { "day": "Sat", "temp": 30, "condition": "Clear" },
+            { "day": "Sun", "temp": 29, "condition": "Sunny" }
+          ]
+        }
+      `;
+      const result = await aiModel.generateContent(promptText);
+      const text = result.response.text();
+      const cleanJson = text.replace(/```json/gi, '').replace(/```/g, '').trim();
+      const weather = JSON.parse(cleanJson);
+      return res.json(weather);
+    } catch (err) {
+      console.error('Gemini weather error, using smart fallback:', err.message);
+    }
+  }
+
+  res.json(getMockWeather(destination));
 });
 
 // Saved Trips Endpoints

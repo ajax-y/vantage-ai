@@ -63,9 +63,15 @@ export default function Restaurants({ activeDestination }) {
                 <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', flex: 1 }}>{restaurant.description}</p>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1rem', borderTop: '1px solid var(--border-glass)', paddingTop: '1rem' }}>
                   <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Average Price: <strong style={{ color: 'var(--text-primary)' }}>{restaurant.price}</strong></span>
-                  <button className="btn btn-secondary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }} onClick={() => alert(`Details for ${restaurant.name} coming soon!`)}>
-                    View Details
-                  </button>
+                  <a
+                    href={restaurant.mapsUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(restaurant.name)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn btn-secondary"
+                    style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem', textDecoration: 'none' }}
+                  >
+                    Maps & Directions 📍
+                  </a>
                 </div>
               </div>
             </div>

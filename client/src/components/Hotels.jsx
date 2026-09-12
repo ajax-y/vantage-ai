@@ -76,9 +76,15 @@ export default function Hotels({ activeDestination, activeBudget }) {
                     <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)' }}>EST. RATE</span>
                     <span style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--color-success)' }}>₹{hotel.pricePerNight.toLocaleString('en-IN')} <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>/ night</span></span>
                   </div>
-                  <button className="btn btn-secondary" style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }} onClick={() => alert(`Redirecting to simulate booking at ${hotel.name}!`)}>
-                    Select
-                  </button>
+                  <a
+                    href={hotel.bookingUrl || `https://www.booking.com/searchresults.html?ss=${encodeURIComponent(hotel.name)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn btn-primary"
+                    style={{ padding: '0.5rem 1rem', fontSize: '0.85rem', textDecoration: 'none' }}
+                  >
+                    Book Stay ↗
+                  </a>
                 </div>
               </div>
             </div>

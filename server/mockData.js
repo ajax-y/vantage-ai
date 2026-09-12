@@ -1,19 +1,5 @@
-// Dynamic engine for Weather, Hotels, and Restaurants tailored to ANY requested destination
+// Dynamic engine with real booking & map navigation links
 
-function getDestinationKey(dest) {
-  if (!dest) return 'default';
-  const clean = dest.toLowerCase().trim();
-  if (clean.includes('paris') || clean.includes('france')) return 'paris';
-  if (clean.includes('tokyo') || clean.includes('japan')) return 'tokyo';
-  if (clean.includes('new york') || clean.includes('nyc') || clean.includes('america')) return 'new_york';
-  if (clean.includes('london') || clean.includes('uk') || clean.includes('england')) return 'london';
-  if (clean.includes('bali') || clean.includes('indonesia')) return 'bali';
-  if (clean.includes('rome') || clean.includes('italy')) return 'rome';
-  if (clean.includes('goa') || clean.includes('india') || clean.includes('delhi') || clean.includes('mumbai')) return 'india';
-  return 'custom';
-}
-
-// Generate hash code for deterministic values per destination
 function hashCode(str) {
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
@@ -31,7 +17,7 @@ function capitalizeWords(str) {
 function getMockWeather(destination) {
   const destName = capitalizeWords(destination || 'Paris');
   const hash = hashCode(destName);
-  const baseTemp = 18 + (hash % 15); // temperature between 18C and 32C
+  const baseTemp = 18 + (hash % 15);
   const conditions = ['Sunny', 'Partly Cloudy', 'Clear', 'Light Breeze', 'Pleasant'];
   const mainCondition = conditions[hash % conditions.length];
 
@@ -55,6 +41,7 @@ function getMockWeather(destination) {
 function getMockHotels(destination, budgetVal) {
   const destName = capitalizeWords(destination || 'Destination');
   const hash = hashCode(destName);
+  const encodedDest = encodeURIComponent(`${destName} hotels`);
 
   const rawList = [
     {
@@ -64,7 +51,8 @@ function getMockHotels(destination, budgetVal) {
       price: 'Premium Luxury',
       pricePerNight: 28000,
       image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=500',
-      description: `Luxury resort located in prime central ${destName} featuring panoramic city views, fine dining, and full infinity pool.`
+      description: `Luxury resort located in prime central ${destName} featuring panoramic city views, fine dining, and full infinity pool.`,
+      bookingUrl: `https://www.booking.com/searchresults.html?ss=${encodedDest}`
     },
     {
       id: `h_${hash}_2`,
@@ -73,7 +61,8 @@ function getMockHotels(destination, budgetVal) {
       price: 'Luxury',
       pricePerNight: 16000,
       image: 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=500',
-      description: `Elegant business and leisure suites in ${destName} with rooftop cocktail lounge and complimentary breakfast.`
+      description: `Elegant business and leisure suites in ${destName} with rooftop cocktail lounge and complimentary breakfast.`,
+      bookingUrl: `https://www.google.com/travel/hotels/${encodedDest}`
     },
     {
       id: `h_${hash}_3`,
@@ -82,7 +71,8 @@ function getMockHotels(destination, budgetVal) {
       price: 'Moderate',
       pricePerNight: 8500,
       image: 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=500',
-      description: `Modern boutique stay located close to top shopping areas and local transport hubs in ${destName}.`
+      description: `Modern boutique stay located close to top shopping areas and local transport hubs in ${destName}.`,
+      bookingUrl: `https://www.agoda.com/search?text=${encodedDest}`
     },
     {
       id: `h_${hash}_4`,
@@ -91,7 +81,8 @@ function getMockHotels(destination, budgetVal) {
       price: 'Budget Friendly',
       pricePerNight: 4200,
       image: 'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=500',
-      description: `Cozy, well-kept hotel with clean rooms, high-speed WiFi, and friendly 24/7 concierge.`
+      description: `Cozy, well-kept hotel with clean rooms, high-speed WiFi, and friendly 24/7 concierge.`,
+      bookingUrl: `https://www.booking.com/searchresults.html?ss=${encodedDest}`
     },
     {
       id: `h_${hash}_5`,
@@ -100,7 +91,8 @@ function getMockHotels(destination, budgetVal) {
       price: 'Super Budget',
       pricePerNight: 1800,
       image: 'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?w=500',
-      description: `Vibrant social stay with comfortable private rooms & shared lounges for budget-conscious travelers.`
+      description: `Vibrant social stay with comfortable private rooms & shared lounges for budget-conscious travelers.`,
+      bookingUrl: `https://www.hostelworld.com/search?search_keywords=${encodedDest}`
     }
   ];
 
@@ -118,6 +110,7 @@ function getMockHotels(destination, budgetVal) {
 function getMockRestaurants(destination) {
   const destName = capitalizeWords(destination || 'Destination');
   const hash = hashCode(destName);
+  const encodedQuery = encodeURIComponent(`${destName} best restaurants`);
 
   return [
     {
@@ -126,7 +119,8 @@ function getMockRestaurants(destination) {
       cuisine: 'Fine Dining & Global Fusion',
       rating: 4.9,
       price: '₹₹₹₹',
-      description: `Premier gourmet restaurant in ${destName} renowned for master chef specials and curated wine pairings.`
+      description: `Premier gourmet restaurant in ${destName} renowned for master chef specials and curated wine pairings.`,
+      mapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodedQuery}`
     },
     {
       id: `r_${hash}_2`,
@@ -134,7 +128,8 @@ function getMockRestaurants(destination) {
       cuisine: 'Traditional & Local Specialties',
       rating: 4.7,
       price: '₹₹₹',
-      description: `Top-rated dining spot loved by locals for traditional signature recipes and vibrant atmosphere.`
+      description: `Top-rated dining spot loved by locals for traditional signature recipes and vibrant atmosphere.`,
+      mapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodedQuery}`
     },
     {
       id: `r_${hash}_3`,
@@ -142,7 +137,8 @@ function getMockRestaurants(destination) {
       cuisine: 'Artisanal Coffee & Italian',
       rating: 4.5,
       price: '₹₹',
-      description: `Relaxed open-air garden cafe serving fresh oven-baked pizzas, hand-crafted pastas, and organic coffee.`
+      description: `Relaxed open-air garden cafe serving fresh oven-baked pizzas, hand-crafted pastas, and organic coffee.`,
+      mapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodedQuery}`
     },
     {
       id: `r_${hash}_4`,
@@ -150,7 +146,8 @@ function getMockRestaurants(destination) {
       cuisine: 'Authentic Street Food',
       rating: 4.6,
       price: '₹',
-      description: `Popular bustling street stall market offering authentic regional delicacies and fast bites.`
+      description: `Popular bustling street stall market offering authentic regional delicacies and fast bites.`,
+      mapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodedQuery}`
     }
   ];
 }
