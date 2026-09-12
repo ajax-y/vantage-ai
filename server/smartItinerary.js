@@ -1,7 +1,7 @@
-// High quality image mapper for landmark photos
+// High quality image mapper for destination and landmark photos
 function getLandmarkImage(destination, placeName) {
-  const query = encodeURIComponent(`${placeName} ${destination}`.toLowerCase());
-  return `https://source.unsplash.com/featured/600x400/?${query},landmark,travel`;
+  const query = encodeURIComponent(`${placeName || destination}`.replace(/[^a-zA-Z0-9\s]/g, '').trim());
+  return `https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&auto=format&fit=crop&q=80`;
 }
 
 function getGoogleMapsUrl(placeName, destination) {

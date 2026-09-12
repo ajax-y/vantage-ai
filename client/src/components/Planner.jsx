@@ -210,14 +210,24 @@ export default function Planner({ user, activeTrip, setActiveTrip, setTab, onSav
                   const renderSlot = (label, icon, color, slot) => {
                     if (!slot) return null;
                     const mapsUrl = slot.mapsUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((slot.placeName || activeTrip.destination) + ' ' + activeTrip.destination)}`;
+                    const imgUrl = slot.image || `https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&auto=format&fit=crop&q=80`;
                     return (
-                      <div className="glass-panel" style={{ padding: '1rem', borderRadius: '10px', background: 'rgba(255, 255, 255, 0.02)', border: '1px solid var(--border-glass)' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-                          <span style={{ fontWeight: 'bold', color: color, fontSize: '0.9rem' }}>{icon} {label}: {slot.placeName || 'Landmark'}</span>
-                          <span style={{ fontSize: '0.85rem', color: 'var(--color-success)', fontWeight: 'bold' }}>₹{slot.cost || 0}</span>
+                      <div className="glass-panel" style={{ padding: '1rem', borderRadius: '12px', background: 'rgba(255, 255, 255, 0.02)', border: '1px solid var(--border-glass)' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                          <span style={{ fontWeight: 'bold', color: color, fontSize: '0.95rem' }}>{icon} {label}: {slot.placeName || 'Landmark'}</span>
+                          <span style={{ fontSize: '0.85rem', color: 'var(--color-success)', fontWeight: 'bold', background: 'rgba(16, 185, 129, 0.1)', padding: '0.2rem 0.5rem', borderRadius: '6px' }}>₹{slot.cost || 0}</span>
                         </div>
-                        <p style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', marginBottom: '0.75rem', lineHeight: '1.5' }}>{slot.activity}</p>
-                        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+
+                        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'flex-start' }}>
+                          <img
+                            src={imgUrl}
+                            alt={slot.placeName || 'Landmark'}
+                            style={{ width: '100%', maxHeight: '140px', objectFit: 'cover', borderRadius: '8px', border: '1px solid var(--border-glass)' }}
+                          />
+                          <p style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: '1.5', flex: 1, margin: 0 }}>{slot.activity}</p>
+                        </div>
+
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '0.75rem' }}>
                           <a
                             href={mapsUrl}
                             target="_blank"
