@@ -55,7 +55,11 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
         onClose();
       }
     } catch (err) {
-      setError(err.message);
+      if (err.name === 'TypeError' && err.message.includes('fetch')) {
+        setError('Connecting to backend server... (If server was idle on Render, please wait 15 seconds and try again)');
+      } else {
+        setError(err.message || 'Network connection error');
+      }
     } finally {
       setLoading(false);
     }

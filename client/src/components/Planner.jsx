@@ -167,39 +167,41 @@ export default function Planner({ user, activeTrip, setActiveTrip, setTab, onSav
                 </div>
               </div>
 
-              <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem', lineHeight: '1.6' }}>{activeTrip.summary}</p>
+              <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem', lineHeight: '1.6' }}>{activeTrip.summary || `Personalized ${activeTrip.duration || 3}-day trip to ${activeTrip.destination}.`}</p>
 
               {/* Budget Estimation section */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem', marginBottom: '2.5rem', background: 'rgba(255, 255, 255, 0.02)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border-glass)' }}>
-                <div>
-                  <h4 style={{ color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Cost Estimates</h4>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.9rem' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <span>Hotel / Stay:</span>
-                      <strong>₹{activeTrip.budgetBreakdown.accommodation}</strong>
+              {activeTrip.budgetBreakdown && (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem', marginBottom: '2.5rem', background: 'rgba(255, 255, 255, 0.02)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border-glass)' }}>
+                  <div>
+                    <h4 style={{ color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Cost Estimates</h4>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.9rem' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <span>Hotel / Stay:</span>
+                        <strong>₹{activeTrip.budgetBreakdown.accommodation || 0}</strong>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <span>Food & Dining:</span>
+                        <strong>₹{activeTrip.budgetBreakdown.foodAndDrinks || 0}</strong>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <span>Activities:</span>
+                        <strong>₹{activeTrip.budgetBreakdown.activities || 0}</strong>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <span>Transport:</span>
+                        <strong>₹{activeTrip.budgetBreakdown.transport || 0}</strong>
+                      </div>
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <span>Food & Dining:</span>
-                      <strong>₹{activeTrip.budgetBreakdown.foodAndDrinks}</strong>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <span>Activities:</span>
-                      <strong>₹{activeTrip.budgetBreakdown.activities}</strong>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <span>Transport:</span>
-                      <strong>₹{activeTrip.budgetBreakdown.transport}</strong>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                    <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>ESTIMATED TOTAL</span>
+                    <span style={{ fontSize: '2.25rem', fontWeight: '800', color: 'var(--color-success)' }}>₹{activeTrip.budgetBreakdown.totalEstimate || 0}</span>
+                    <div className="budget-meter">
+                      <div className="budget-meter-fill" style={{ width: '80%' }} />
                     </div>
                   </div>
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                  <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>ESTIMATED TOTAL</span>
-                  <span style={{ fontSize: '2.25rem', fontWeight: '800', color: 'var(--color-success)' }}>₹{activeTrip.budgetBreakdown.totalEstimate}</span>
-                  <div className="budget-meter">
-                    <div className="budget-meter-fill" style={{ width: '80%' }} />
-                  </div>
-                </div>
-              </div>
+              )}
 
               {/* Timeline list */}
               <h3 style={{ marginBottom: '1.5rem' }}>Daily Schedule</h3>
