@@ -24,65 +24,10 @@ if (geminiApiKey) {
   console.log('No GEMINI_API_KEY found. Falling back to the robust local AI Simulation Engine.');
 }
 
-// Simple fallback itinerary generator using numeric budget
+const { generateSmartItinerary } = require('./smartItinerary');
+
 function generateMockItinerary(destination, budget, duration, preferences) {
-  const numericBudget = parseFloat(budget) || 15000;
-  
-  // Calculate breakdown segments
-  const accommodationTotal = Math.round(numericBudget * 0.45);
-  const foodTotal = Math.round(numericBudget * 0.25);
-  const activitiesTotal = Math.round(numericBudget * 0.20);
-  const transportTotal = Math.round(numericBudget * 0.10);
-  const totalCalculated = accommodationTotal + foodTotal + activitiesTotal + transportTotal;
-
-  // Daily values
-  const dailyFood = Math.round(foodTotal / duration);
-  const dailyActivities = Math.round(activitiesTotal / duration);
-
-  const days = [];
-  for (let i = 1; i <= duration; i++) {
-    days.push({
-      day: i,
-      title: `Exploring the Heart of ${destination} - Day ${i}`,
-      morning: {
-        activity: `Guided tour of popular historical sites in ${destination}.`,
-        cost: Math.round(dailyActivities * 0.4)
-      },
-      afternoon: {
-        activity: `Lunch at a traditional local bistro followed by exploring boutique shops matching: "${preferences || 'local landmarks'}".`,
-        cost: Math.round(dailyFood * 0.4 + dailyActivities * 0.6)
-      },
-      evening: {
-        activity: `Elegant dining experience and a scenic night walk around central attractions.`,
-        cost: Math.round(dailyFood * 0.6)
-      }
-    });
-  }
-
-  // Determine budget style text for packing tips
-  const avgDaily = numericBudget / duration;
-  const budgetStyle = avgDaily > 15000 ? 'Luxury' : avgDaily > 5000 ? 'Mid-range' : 'Budget';
-
-  return {
-    destination,
-    budget: `₹${numericBudget}`,
-    duration,
-    preferences,
-    summary: `A personalized ${duration}-day travel experience in ${destination} tailored for a total budget of ₹${numericBudget} (approx ₹${Math.round(avgDaily)}/day), focusing on ${preferences || 'general exploration'}.`,
-    itinerary: days,
-    budgetBreakdown: {
-      accommodation: accommodationTotal,
-      foodAndDrinks: foodTotal,
-      activities: activitiesTotal,
-      transport: transportTotal,
-      totalEstimate: totalCalculated
-    },
-    packingTips: [
-      "Bring comfortable walking shoes for city sightseeing.",
-      budgetStyle === 'Luxury' ? "Pack elegant evening wear for fine-dining reservations." : "Carry a local transit card and look for free attraction entry passes.",
-      "Keep digital copies of all your travel documentation and reservations."
-    ]
-  };
+  return generateSmartItinerary(destination, budget, duration, preferences);
 }
 
 // --- Endpoints ---
