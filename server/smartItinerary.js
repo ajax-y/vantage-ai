@@ -1,4 +1,4 @@
-// Pure Gemini AI Generator - Zero Hardcoded Data
+// Pure Gemini AI Generator - Zero Hardcoded Data & Clean JSON Prompting
 const fetch = require('node-fetch');
 
 // Helper to query Wikimedia Commons API dynamically for real images
@@ -22,48 +22,8 @@ async function fetchRealPlaceImage(queryStr) {
 
 // 100% Dynamic Gemini AI Itinerary Generator
 async function generatePureAIItinerary(aiModel, destination, budget, duration, preferences) {
-  const promptText = `
-    You are an expert global travel AI concierge. Generate a 100% custom, hyper-realistic, day-by-day travel plan for:
-    Destination: ${destination}
-    Total Budget: INR ${budget}
-    Duration: ${duration} Days
-    Preferences: ${preferences || 'General exploration'}
-
-    Strict Requirements:
-    1. Identify exact real-world landmarks, authentic food spots, and neighborhoods in ${destination}.
-    2. Provide accurate INR (₹) costs for every single item strictly fitting into the total budget of ₹${budget}.
-    3. For every morning, afternoon, and evening activity, return:
-       - "placeName": Exact real-world landmark or place name
-       - "activity": Detailed advisory description
-       - "cost": Estimated cost in INR
-    4. Respond ONLY with a valid JSON object matching the schema (no markdown, no backticks).
-
-    Schema:
-    {
-      "destination": "${destination}",
-      "budget": "₹${budget}",
-      "duration": ${duration},
-      "preferences": "${preferences || 'General exploration'}",
-      "summary": "Full overview of the trip in ${destination}...",
-      "itinerary": [
-        {
-          "day": 1,
-          "title": "Day 1 theme...",
-          "morning": { "placeName": "Real Landmark", "activity": "Activity description...", "cost": 100 },
-          "afternoon": { "placeName": "Real Landmark", "activity": "Activity description...", "cost": 150 },
-          "evening": { "placeName": "Real Landmark", "activity": "Activity description...", "cost": 200 }
-        }
-      ],
-      "budgetBreakdown": {
-        "accommodation": 1000,
-        "foodAndDrinks": 800,
-        "activities": 400,
-        "transport": 300,
-        "totalEstimate": ${budget}
-      },
-      "packingTips": ["Tip 1", "Tip 2", "Tip 3"]
-    }
-  `;
+  const userPref = preferences || 'General exploration';
+  const promptText = `Generate a JSON travel plan for ${destination} with a budget of INR ${budget} for ${duration} days. User preferences: ${userPref}. Respond ONLY with raw valid JSON (no markdown formatting, no codeblocks). Format: {"destination":"string","budget":"string","duration":number,"preferences":"string","summary":"string","itinerary":[{"day":number,"title":"string","morning":{"placeName":"string","activity":"string","cost":number},"afternoon":{"placeName":"string","activity":"string","cost":number},"evening":{"placeName":"string","activity":"string","cost":number}}],"budgetBreakdown":{"accommodation":number,"foodAndDrinks":number,"activities":number,"transport":number,"totalEstimate":number},"packingTips":["string"]}`;
 
   let planData;
   if (aiModel) {
@@ -72,7 +32,7 @@ async function generatePureAIItinerary(aiModel, destination, budget, duration, p
     const cleanJson = text.replace(/```json/gi, '').replace(/```/g, '').trim();
     planData = JSON.parse(cleanJson);
   } else {
-    throw new Error('AI Model required');
+    throw new Error('AI Model required to generate trip.');
   }
 
   // Populate dynamic real images and Google Maps links for every generated activity

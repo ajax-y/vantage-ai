@@ -72,12 +72,12 @@ app.post('/api/profile/preferences', async (req, res) => {
   }
 });
 
-// AI Planner Endpoint (100% Pure Gemini AI + Dynamic Wikimedia Image Fetching)
+// AI Planner Endpoint
 app.post('/api/generate-trip', async (req, res) => {
   const { destination, budget, duration, preferences } = req.body;
 
   if (!destination || !budget || !duration) {
-    return res.status(400).json({ error: 'Missing required parameters (destination, budget, duration)' });
+    return res.status(400).json({ error: 'Missing required parameters' });
   }
 
   try {
@@ -95,14 +95,7 @@ app.post('/api/chat', async (req, res) => {
   
   if (aiModel) {
     try {
-      const chatPrompt = `
-        You are Vantage AI, an expert travel concierge. The user is planning a trip to ${context?.destination || 'their destination'} (Budget: ${context?.budget || 'budget'} INR).
-        Planned Itinerary Context: ${JSON.stringify(context?.itinerary || [])}
-        
-        User Query: ${message}
-        
-        Provide an insightful, polite, and practical travel advisory response. Keep currency in INR (₹).
-      `;
+      const chatPrompt = `You are Vantage AI concierge. User trip context: ${JSON.stringify(context)}. User query: ${message}. Answer helpfully in INR (₹).`;
       const result = await aiModel.generateContent(chatPrompt);
       return res.json({ reply: result.response.text() });
     } catch (err) {
@@ -110,45 +103,27 @@ app.post('/api/chat', async (req, res) => {
     }
   }
 
-  res.json({ reply: `For your trip to ${context?.destination || 'this location'}, adjusting schedules and activities is simple! Let me know what you would like to customize.` });
+  res.json({ reply: `How would you like to customize your trip to ${context?.destination}?` });
 });
 
 // AI Stays & Accommodations Endpoint
 app.get('/api/hotels', async (req, res) => {
   const { destination, budget } = req.query;
-  const targetDest = destination || 'Goa';
-  const targetBudget = budget || '3000';
 
   if (!aiModel) {
     return res.status(500).json({ error: 'AI Model not configured' });
   }
 
   try {
-    const promptText = `
-      List 4 REAL, highly-rated hotels or budget stays in ${targetDest} suitable for a daily stay budget of INR ${targetBudget}.
-      Respond ONLY with a valid JSON array of objects (no markdown, no backticks).
-
-      Schema:
-      [
-        {
-          "id": "h1",
-          "name": "Exact Real Hotel Name",
-          "rating": 4.5,
-          "price": "Budget / Moderate / Luxury",
-          "pricePerNight": 1500,
-          "description": "Brief description of location and highlights..."
-        }
-      ]
-    `;
+    const promptText = `List 4 real hotels in ${destination} for daily budget INR ${budget}. Respond ONLY with raw valid JSON array: [{"id":"string","name":"string","rating":number,"price":"string","pricePerNight":number,"description":"string"}]`;
     const result = await aiModel.generateContent(promptText);
     const text = result.response.text();
     const cleanJson = text.replace(/```json/gi, '').replace(/```/g, '').trim();
     const hotels = JSON.parse(cleanJson);
 
-    // Dynamic AI Image and Booking URL Attachment
     for (const h of hotels) {
-      h.image = await fetchRealPlaceImage(`${h.name} ${targetDest}`);
-      h.bookingUrl = `https://www.booking.com/searchresults.html?ss=${encodeURIComponent(`${h.name} ${targetDest}`)}`;
+      h.image = await fetchRealPlaceImage(`${h.name} ${destination}`);
+      h.bookingUrl = `https://www.booking.com/searchresults.html?ss=${encodeURIComponent(`${h.name} ${destination}`)}`;
     }
 
     return res.json(hotels);
@@ -161,38 +136,21 @@ app.get('/api/hotels', async (req, res) => {
 // AI Dining & Restaurants Endpoint
 app.get('/api/restaurants', async (req, res) => {
   const { destination } = req.query;
-  const targetDest = destination || 'Goa';
 
   if (!aiModel) {
     return res.status(500).json({ error: 'AI Model not configured' });
   }
 
   try {
-    const promptText = `
-      List 4 REAL, famous restaurants or local dining spots in ${targetDest}.
-      Respond ONLY with a valid JSON array of objects (no markdown, no backticks).
-
-      Schema:
-      [
-        {
-          "id": "r1",
-          "name": "Exact Real Restaurant Name",
-          "cuisine": "Cuisine type",
-          "rating": 4.7,
-          "price": "₹₹",
-          "description": "Must-try dish and atmosphere..."
-        }
-      ]
-    `;
+    const promptText = `List 4 real famous dining spots in ${destination}. Respond ONLY with raw valid JSON array: [{"id":"string","name":"string","cuisine":"string","rating":number,"price":"string","description":"string"}]`;
     const result = await aiModel.generateContent(promptText);
     const text = result.response.text();
     const cleanJson = text.replace(/```json/gi, '').replace(/```/g, '').trim();
     const restaurants = JSON.parse(cleanJson);
 
-    // Dynamic AI Image and Google Maps URL Attachment
     for (const r of restaurants) {
-      r.image = await fetchRealPlaceImage(`${r.name} ${targetDest}`);
-      r.mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${r.name}, ${targetDest}`)}`;
+      r.image = await fetchRealPlaceImage(`${r.name} ${destination}`);
+      r.mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${r.name}, ${destination}`)}`;
     }
 
     return res.json(restaurants);
@@ -205,35 +163,13 @@ app.get('/api/restaurants', async (req, res) => {
 // AI Weather API Endpoint
 app.get('/api/weather', async (req, res) => {
   const { destination } = req.query;
-  const targetDest = destination || 'Paris';
 
   if (!aiModel) {
     return res.status(500).json({ error: 'AI Model not configured' });
   }
 
   try {
-    const promptText = `
-      Provide accurate current weather and 7-day forecast for ${targetDest}.
-      Respond ONLY with a valid JSON object (no markdown, no backticks).
-
-      Schema:
-      {
-        "destination": "${targetDest}",
-        "temp": 28,
-        "condition": "Sunny",
-        "humidity": 60,
-        "windSpeed": 12,
-        "forecast": [
-          { "day": "Mon", "temp": 28, "condition": "Sunny" },
-          { "day": "Tue", "temp": 29, "condition": "Clear" },
-          { "day": "Wed", "temp": 27, "condition": "Partly Cloudy" },
-          { "day": "Thu", "temp": 26, "condition": "Light Rain" },
-          { "day": "Fri", "temp": 28, "condition": "Sunny" },
-          { "day": "Sat", "temp": 30, "condition": "Clear" },
-          { "day": "Sun", "temp": 29, "condition": "Sunny" }
-        ]
-      }
-    `;
+    const promptText = `Weather and 7-day forecast for ${destination}. Respond ONLY with raw valid JSON: {"destination":"string","temp":number,"condition":"string","humidity":number,"windSpeed":number,"forecast":[{"day":"string","temp":number,"condition":"string"}]}`;
     const result = await aiModel.generateContent(promptText);
     const text = result.response.text();
     const cleanJson = text.replace(/```json/gi, '').replace(/```/g, '').trim();
