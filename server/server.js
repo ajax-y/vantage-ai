@@ -96,6 +96,11 @@ app.post('/api/generate-trip', async (req, res) => {
         Rules:
         - All currency numbers must be in INR (₹) and strictly realistic to the destination and total budget.
         - Mention REAL local landmarks, authentic food spots, and neighborhoods for ${destination}.
+        - For every morning, afternoon, and evening activity, include:
+          * "placeName": Exact real landmark name
+          * "activity": Detailed activity description
+          * "mapsUrl": "https://www.google.com/maps/search/?api=1&query=" + URI encoded place name
+          * "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=500"
         - Respond ONLY with valid raw JSON (no markdown formatting, no backticks).
 
         Schema:
@@ -109,9 +114,9 @@ app.post('/api/generate-trip', async (req, res) => {
             {
               "day": 1,
               "title": "Day title...",
-              "morning": { "activity": "Specific authentic morning activity...", "cost": 100 },
-              "afternoon": { "activity": "Specific authentic afternoon activity & lunch...", "cost": 200 },
-              "evening": { "activity": "Specific evening experience & dinner...", "cost": 150 }
+              "morning": { "placeName": "Exact Landmark", "activity": "Specific authentic morning activity...", "mapsUrl": "https://www.google.com/maps/search/?api=1&query=...", "image": "https://...", "cost": 100 },
+              "afternoon": { "placeName": "Exact Landmark", "activity": "Specific authentic afternoon activity & lunch...", "mapsUrl": "https://www.google.com/maps/search/?api=1&query=...", "image": "https://...", "cost": 200 },
+              "evening": { "placeName": "Exact Landmark", "activity": "Specific evening experience & dinner...", "mapsUrl": "https://www.google.com/maps/search/?api=1&query=...", "image": "https://...", "cost": 150 }
             }
           ],
           "budgetBreakdown": {

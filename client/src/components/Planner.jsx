@@ -206,23 +206,44 @@ export default function Planner({ user, activeTrip, setActiveTrip, setTab, onSav
               {/* Timeline list */}
               <h3 style={{ marginBottom: '1.5rem' }}>Daily Schedule</h3>
               <div className="timeline">
-                {activeTrip.itinerary.map((d) => (
-                  <div key={d.day} className="timeline-item">
-                    <div className="timeline-dot" />
-                    <h4 style={{ color: 'white', marginBottom: '0.75rem' }}>{d.title}</h4>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.95rem' }}>
-                      <div>
-                        <strong style={{ color: 'var(--color-accent)' }}>🌅 Morning:</strong> {d.morning.activity} <span style={{ color: 'var(--text-muted)' }}>(₹{d.morning.cost})</span>
+                {activeTrip.itinerary.map((d) => {
+                  const renderSlot = (label, icon, color, slot) => {
+                    if (!slot) return null;
+                    const mapsUrl = slot.mapsUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((slot.placeName || activeTrip.destination) + ' ' + activeTrip.destination)}`;
+                    return (
+                      <div className="glass-panel" style={{ padding: '1rem', borderRadius: '10px', background: 'rgba(255, 255, 255, 0.02)', border: '1px solid var(--border-glass)' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                          <span style={{ fontWeight: 'bold', color: color, fontSize: '0.9rem' }}>{icon} {label}: {slot.placeName || 'Landmark'}</span>
+                          <span style={{ fontSize: '0.85rem', color: 'var(--color-success)', fontWeight: 'bold' }}>₹{slot.cost || 0}</span>
+                        </div>
+                        <p style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', marginBottom: '0.75rem', lineHeight: '1.5' }}>{slot.activity}</p>
+                        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                          <a
+                            href={mapsUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="btn btn-secondary"
+                            style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}
+                          >
+                            📍 View Location & Maps
+                          </a>
+                        </div>
                       </div>
-                      <div>
-                        <strong style={{ color: 'var(--color-primary)' }}>☀️ Afternoon:</strong> {d.afternoon.activity} <span style={{ color: 'var(--text-muted)' }}>(₹{d.afternoon.cost})</span>
-                      </div>
-                      <div>
-                        <strong style={{ color: '#ec4899' }}>🌇 Evening:</strong> {d.evening.activity} <span style={{ color: 'var(--text-muted)' }}>(₹{d.evening.cost})</span>
+                    );
+                  };
+
+                  return (
+                    <div key={d.day} className="timeline-item">
+                      <div className="timeline-dot" />
+                      <h4 style={{ color: 'white', marginBottom: '1rem', fontFamily: 'var(--font-display)', fontSize: '1.1rem' }}>{d.title}</h4>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        {renderSlot('Morning', '🌅', 'var(--color-accent)', d.morning)}
+                        {renderSlot('Afternoon', '☀️', 'var(--color-primary)', d.afternoon)}
+                        {renderSlot('Evening', '🌇', '#ec4899', d.evening)}
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
 
               {/* Travel packing tips */}

@@ -1,4 +1,12 @@
-// Smart Travel Intelligence Generator for authentic, realistic, & highly detailed itineraries
+// High quality image mapper for landmark photos
+function getLandmarkImage(destination, placeName) {
+  const query = encodeURIComponent(`${placeName} ${destination}`.toLowerCase());
+  return `https://source.unsplash.com/featured/600x400/?${query},landmark,travel`;
+}
+
+function getGoogleMapsUrl(placeName, destination) {
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${placeName}, ${destination}`)}`;
+}
 
 function generateSmartItinerary(destination, budget, duration, preferences) {
   const numericBudget = parseFloat(budget) || 2500;
@@ -6,112 +14,83 @@ function generateSmartItinerary(destination, budget, duration, preferences) {
   const destClean = (destination || 'Marina Beach').trim();
   const lowerDest = destClean.toLowerCase();
 
-  // Determine neighborhood and theme knowledge base
-  let neighborhood = 'central neighborhood';
-  let transit = 'public bus/train or local auto';
+  let neighborhood = 'Central District';
+  let transit = 'Public bus/train or auto';
   let morningLandmarks = [];
   let afternoonLandmarks = [];
   let eveningLandmarks = [];
   let foodNotes = [];
 
   if (lowerDest.includes('marina') || lowerDest.includes('chennai')) {
-    neighborhood = 'Triplicane / Mylapore (near Marina Beach)';
+    neighborhood = 'Triplicane & Mylapore (near Marina Beach)';
     transit = 'MTC buses & Suburban/MRTS trains';
     morningLandmarks = [
-      'Morning beach stroll along Marina Promenade & traditional South Indian breakfast (idli/dosa/filter coffee)',
-      'Visit 8th-century Arulmigu Sri Parthasarathyswamy Temple in Triplicane',
-      'Walk to Fort St. George & view historic heritage buildings along Kamarajar Salai'
+      { name: 'Marina Beach Promenade', place: 'Marina Beach Promenade', desc: 'Stroll along the world\'s 2nd longest natural urban beach and enjoy traditional filter coffee.' },
+      { name: 'Parthasarathy Temple', place: 'Arulmigu Sri Parthasarathyswamy Temple Triplicane', desc: 'Historic 8th-century Vaishnavite temple featuring ancient Dravidian architecture.' },
+      { name: 'Fort St. George & Museum', place: 'Fort St George Chennai', desc: 'First English fortress in India built in 1644 along the Bay of Bengal.' }
     ];
     afternoonLandmarks = [
-      'Visit Vivekananda House (Illam) museum & enjoy traditional full South Indian meals',
-      'Take local train to Kapaleeshwarar Temple in Mylapore & explore tiffin centers',
-      'Explore Santhome Cathedral Basilica & local spice/flower markets'
+      { name: 'Vivekananda House (Illam)', place: 'Vivekananda House Chennai', desc: 'Historic ice-house museum dedicated to Swami Vivekananda\'s stay in 1897.' },
+      { name: 'Kapaleeshwarar Temple', place: 'Kapaleeshwarar Temple Mylapore', desc: '7th-century Dravidian Shiva temple in the cultural heart of Mylapore.' },
+      { name: 'Santhome Cathedral Basilica', place: 'Santhome Cathedral Basilica', desc: 'Neo-Gothic Roman Catholic minor basilica built over the tomb of St. Thomas.' }
     ];
     eveningLandmarks = [
-      'Sunset on Marina shore, sample local beach stalls (sundal, molaga bajji, & fresh tea)',
-      'Relax near southern stretch of Marina Beach & explore street food counters',
-      'Scenic evening breeze at Lighthouse beach view point'
+      { name: 'Marina Food Stalls', place: 'Marina Beach Lighthouse Chennai', desc: 'Sunset ocean breeze with hot sundal, molaga bajji, and tea from local shore stalls.' },
+      { name: 'Mylapore Fine Arts Street', place: 'Mylapore Tank Chennai', desc: 'Traditional evening cultural walk around Mylapore tank and silk sari markets.' },
+      { name: 'Lighthouse Beach View Point', place: 'Chennai Lighthouse Marina Beach', desc: 'Panoramas of the Coromandel Coast from the historic Chennai lighthouse tower.' }
     ];
-    foodNotes = ['Local Tiffin Centers', 'South Indian Thali Meals', 'Sundal & Bajji Stalls'];
+    foodNotes = ['Triplicane Tiffin Messes', 'Mylapore South Indian Thalis', 'Marina Bajji Stalls'];
   } else if (lowerDest.includes('goa')) {
-    neighborhood = 'Calangute / Panjim area';
-    transit = 'rental scooter or local passenger bus';
+    neighborhood = 'North Goa (Calangute / Panjim)';
+    transit = 'Rental scooter or local bus';
     morningLandmarks = [
-      'Early morning walk on golden sands followed by fresh poi bread & tea',
-      'Visit historic Latin Quarter of Fontainhas in Panjim',
-      'Explore Aguada Fort overlooking the Arabian Sea'
+      { name: 'Calangute Beach Promenade', place: 'Calangute Beach Goa', desc: 'Morning shore walk along golden sands with fresh Goan poi bread & tea.' },
+      { name: 'Fontainhas Latin Quarter', place: 'Fontainhas Panjim Goa', desc: 'Quaint Portuguese-style colorful heritage neighborhood in Panjim.' },
+      { name: 'Fort Aguada', place: 'Fort Aguada Goa', desc: '17th-century Portuguese lighthouse & fort standing on Sinquerim Beach.' }
     ];
     afternoonLandmarks = [
-      'Traditional Goan fish thali lunch & relaxing at Anjuna market',
-      'Visit Basilica of Bom Jesus & Se Cathedral in Old Goa',
-      'Shack lunch by the beach & tropical smoothie sampling'
+      { name: 'Anjuna Flea Market', place: 'Anjuna Beach Goa', desc: 'Vibrant local beachside market with handmade crafts, spices, and clothing.' },
+      { name: 'Basilica of Bom Jesus', place: 'Basilica of Bom Jesus Old Goa', desc: 'UNESCO World Heritage monument containing the sacred relics of St. Francis Xavier.' },
+      { name: 'Baga Beach Shacks', place: 'Baga Beach Goa', desc: 'Authentic Goan fish thali lunch at beachside shacks.' }
     ];
     eveningLandmarks = [
-      'Sunset views at Baga Beach with local music and seafood stalls',
-      'Evening Mandovi River cruise or promenade walk',
-      'Night market shopping and evening sea breeze'
+      { name: 'Mandovi River Sunset Cruise', place: 'Panjim Jetty Mandovi River Goa', desc: 'Scenic evening riverboat cruise with Goan folk music & dancing.' },
+      { name: 'Chapora Fort Sunset', place: 'Chapora Fort Goa', desc: 'Panoramic sunset views overlooking Vagator Beach and the Chapora river mouth.' },
+      { name: 'Tito\'s Lane Night Market', place: 'Titos Lane Baga Goa', desc: 'Lively evening street markets and seaside dining.' }
     ];
-    foodNotes = ['Goan Fish Thali', 'Poi & Bhaji Stalls', 'Beach Shacks'];
-  } else if (lowerDest.includes('paris')) {
-    neighborhood = 'Le Marais / Latin Quarter';
-    transit = 'Metro & RER city trains';
-    morningLandmarks = [
-      'Stroll along the Seine River & fresh croissant/espresso at a corner bakery',
-      'Morning walk through Jardin du Luxembourg',
-      'Explore Montmartre & Sacré-Cœur basilica'
-    ];
-    afternoonLandmarks = [
-      'Louvre Museum courtyard view & classic French bistro lunch',
-      'Explore boutique shops & historic alleyways in Le Marais',
-      'Musée d\'Orsay art gallery exploration'
-    ];
-    eveningLandmarks = [
-      'Eiffel Tower light show view from Champ de Mars & evening walk',
-      'Latin Quarter nightlife & authentic crepe sampling',
-      'Seine River night promenade stroll'
-    ];
-    foodNotes = ['French Boulangerie', 'Bistro Meals', 'Crepe Counters'];
+    foodNotes = ['Goan Fish Thali', 'Poi & Bhaji Stalls', 'Beach Shack Seafood'];
   } else {
-    // Dynamic universal generator for any custom destination
-    neighborhood = `central district of ${destClean}`;
-    transit = 'local transit & walking tours';
+    neighborhood = `Central District of ${destClean}`;
+    transit = 'Local metro, buses & walking tours';
     morningLandmarks = [
-      `Morning city walking tour of historic downtown ${destClean} & breakfast`,
-      `Visit famous cultural heritage landmarks & local parks in ${destClean}`,
-      `Explore central square & iconic morning architectural sites in ${destClean}`
+      { name: `Historic Downtown ${destClean}`, place: `Historic Downtown ${destClean}`, desc: `Morning exploration of famous heritage landmarks and central plazas in ${destClean}.` },
+      { name: `Central Gardens & Park`, place: `Central Park ${destClean}`, desc: `Refreshing morning walk through premier botanical gardens and civic monuments.` },
+      { name: `Heritage Grand Square`, place: `Main Square ${destClean}`, desc: `Iconic morning architectural tour of grand plazas in ${destClean}.` }
     ];
     afternoonLandmarks = [
-      `Authentic regional lunch at top-rated local dining hall in ${destClean}`,
-      `Visit top museums & shopping markets in ${destClean}`,
-      `Scenic afternoon excursion matching user interests: "${preferences || 'local sight-seeing'}"`
+      { name: `National Museum of ${destClean}`, place: `National Museum ${destClean}`, desc: `Discover world-class art, history, and cultural exhibits.` },
+      { name: `Boutique Arts Market`, place: `Central Market ${destClean}`, desc: `Explore local artisan handicraft shops matching: "${preferences || 'cultural treasures'}".` },
+      { name: `Old Town District`, place: `Old Town ${destClean}`, desc: `Atmospheric afternoon stroll through historic cobblestone alleyways and cafes.` }
     ];
     eveningLandmarks = [
-      `Golden hour sunset views & stroll along prime promenade in ${destClean}`,
-      `Sample famous local night market street foods & traditional tea/beverages`,
-      `Evening city lights walk & dinner experience`
+      { name: `Sunset Promenade ${destClean}`, place: `Promenade ${destClean}`, desc: `Golden hour sunset stroll along scenic waterfront views.` },
+      { name: `Night Food Market`, place: `Night Market ${destClean}`, desc: `Sample delicious authentic street food, tea, and desserts from local vendors.` },
+      { name: `Cultural Theater & Lights`, place: `Downtown Lights ${destClean}`, desc: `Evening city lights walk & traditional musical performances.` }
     ];
-    foodNotes = ['Local Tiffin & Thali', 'Street Food Markets', 'Regional Cafe'];
+    foodNotes = ['Regional Specialties', 'Street Food Stalls', 'Traditional Bistros'];
   }
 
-  // Budget calculations tailored realistically
   const perDayBudget = Math.round(numericBudget / daysNum);
-  let stayCostPerNight = Math.round(numericBudget * 0.45 / Math.max(1, daysNum - 1));
-  let foodDailyCost = Math.round(numericBudget * 0.35 / daysNum);
-  let transportDailyCost = Math.round(numericBudget * 0.12 / daysNum);
-  let bufferDailyCost = Math.round(numericBudget * 0.08 / daysNum);
-
-  if (numericBudget <= 3000) {
-    stayCostPerNight = Math.round((numericBudget * 0.48) / Math.max(1, daysNum - 1));
-    foodDailyCost = Math.round((numericBudget * 0.36) / daysNum);
-    transportDailyCost = Math.round((numericBudget * 0.08) / daysNum);
-    bufferDailyCost = Math.round((numericBudget * 0.08) / daysNum);
-  }
+  const stayCostPerNight = Math.round((numericBudget * 0.45) / Math.max(1, daysNum - 1));
+  const foodDailyCost = Math.round((numericBudget * 0.35) / daysNum);
+  const transportDailyCost = Math.round((numericBudget * 0.12) / daysNum);
+  const bufferDailyCost = Math.round((numericBudget * 0.08) / daysNum);
 
   const days = [];
   for (let i = 1; i <= daysNum; i++) {
-    const morningIndex = (i - 1) % morningLandmarks.length;
-    const afternoonIndex = (i - 1) % afternoonLandmarks.length;
-    const eveningIndex = (i - 1) % eveningLandmarks.length;
+    const mItem = morningLandmarks[(i - 1) % morningLandmarks.length];
+    const aItem = afternoonLandmarks[(i - 1) % afternoonLandmarks.length];
+    const eItem = eveningLandmarks[(i - 1) % eveningLandmarks.length];
 
     const mCost = Math.round(foodDailyCost * 0.3 + transportDailyCost * 0.4);
     const aCost = Math.round(foodDailyCost * 0.4 + transportDailyCost * 0.6 + bufferDailyCost * 0.5);
@@ -121,15 +100,24 @@ function generateSmartItinerary(destination, budget, duration, preferences) {
       day: i,
       title: `Day ${i}: ${getThemeTitle(i, destClean)}`,
       morning: {
-        activity: morningLandmarks[morningIndex],
+        activity: mItem.desc,
+        placeName: mItem.name,
+        mapsUrl: getGoogleMapsUrl(mItem.place, destClean),
+        image: getLandmarkImage(destClean, mItem.name),
         cost: mCost
       },
       afternoon: {
-        activity: afternoonLandmarks[afternoonIndex],
+        activity: aItem.desc,
+        placeName: aItem.name,
+        mapsUrl: getGoogleMapsUrl(aItem.place, destClean),
+        image: getLandmarkImage(destClean, aItem.name),
         cost: aCost
       },
       evening: {
-        activity: eveningLandmarks[eveningIndex],
+        activity: eItem.desc,
+        placeName: eItem.name,
+        mapsUrl: getGoogleMapsUrl(eItem.place, destClean),
+        image: getLandmarkImage(destClean, eItem.name),
         cost: eCost
       }
     });
@@ -146,7 +134,7 @@ function generateSmartItinerary(destination, budget, duration, preferences) {
     budget: `₹${numericBudget}`,
     duration: daysNum,
     preferences: preferences || 'Local culture & sights',
-    summary: `A realistic ${daysNum}-day budget trip to ${destClean} based in ${neighborhood}. Tailored for a budget of ₹${numericBudget} (approx ₹${perDayBudget}/day) using ${transit} and authentic local dining (${foodNotes.join(', ')}).`,
+    summary: `A realistic ${daysNum}-day budget trip to ${destClean} based in ${neighborhood}. Tailored for a total budget of ₹${numericBudget} (approx ₹${perDayBudget}/day) using ${transit} and authentic local dining (${foodNotes.join(', ')}).`,
     itinerary: days,
     budgetBreakdown: {
       accommodation: accommodationTotal,
@@ -156,9 +144,9 @@ function generateSmartItinerary(destination, budget, duration, preferences) {
       totalEstimate
     },
     packingTips: [
-      `Stay in budget rooms/dorm beds around ${neighborhood} for ~₹${stayCostPerNight}/night.`,
-      `Use ${transit} to keep travel costs under ~₹${transportDailyCost}/day.`,
-      `Enjoy local meals (${foodNotes[0]}) for delicious dining under ~₹${foodDailyCost}/day.`
+      `Stay in budget rooms/dorms in ${neighborhood} for ~₹${stayCostPerNight}/night.`,
+      `Use ${transit} to keep daily transportation costs under ~₹${transportDailyCost}/day.`,
+      `Sample local dining (${foodNotes[0]}) to keep daily meal costs under ~₹${foodDailyCost}/day.`
     ]
   };
 }
@@ -174,4 +162,4 @@ function getThemeTitle(dayNum, destination) {
   return themes[(dayNum - 1) % themes.length];
 }
 
-module.exports = { generateSmartItinerary };
+module.exports = { generateSmartItinerary, getGoogleMapsUrl, getLandmarkImage };
