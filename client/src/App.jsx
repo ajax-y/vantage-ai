@@ -185,19 +185,21 @@ export default function App() {
             <span className="mobile-nav-icon">🍴</span>
             <span>Dining</span>
           </div>
-          <div className={`mobile-nav-item ${tab === 'weather' ? 'active' : ''}`} onClick={() => setTab('weather')}>
-            <span className="mobile-nav-icon">⛅</span>
-            <span>Weather</span>
-          </div>
           {user ? (
-            <div className={`mobile-nav-item ${tab === 'saved-trips' ? 'active' : ''}`} onClick={() => setTab('saved-trips')}>
-              <span className="mobile-nav-icon">💾</span>
-              <span>Saved</span>
-            </div>
+            <>
+              <div className={`mobile-nav-item ${tab === 'saved-trips' ? 'active' : ''}`} onClick={() => setTab('saved-trips')}>
+                <span className="mobile-nav-icon">💾</span>
+                <span>Saved</span>
+              </div>
+              <div className={`mobile-nav-item ${tab === 'profile' ? 'active' : ''}`} onClick={() => setTab('profile')}>
+                <span className="mobile-nav-icon">👤</span>
+                <span>Profile</span>
+              </div>
+            </>
           ) : (
             <div className="mobile-nav-item" onClick={() => setAuthOpen(true)}>
               <span className="mobile-nav-icon">👤</span>
-              <span>Login</span>
+              <span>Sign In</span>
             </div>
           )}
         </div>
